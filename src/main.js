@@ -43,6 +43,7 @@ class SnakeGame {
     this.muteBtn = document.getElementById('mute-btn');
     this.hofList = document.getElementById('high-scores-list');
     this.homeBtn = document.getElementById('home-btn');
+    this.dashBtn = document.getElementById('mobile-dash-btn');
 
     // State
     this.bytes = parseInt(localStorage.getItem('snake-bytes')) || 0;
@@ -211,6 +212,18 @@ class SnakeGame {
         tsX = tsY = 0;
       }
     }, { passive: false });
+
+    // Mobile Dash Button Binding
+    if (this.dashBtn) {
+      this.dashBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.activateDash();
+      });
+      this.dashBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.activateDash();
+      }, { passive: false });
+    }
   }
 
   togglePause(p) {
@@ -489,8 +502,47 @@ class SnakeGame {
     if (!this.dashCooldownFill) return;
     const cooldownPercent = Math.max(0, 1 - (this.dashCooldown / this.dashMaxCooldown));
     this.dashCooldownFill.style.width = `${cooldownPercent * 100}%`;
-    if (cooldownPercent >= 1 && !this.isDashing) { this.dashCooldownFill.classList.add('ready'); }
-    else { this.dashCooldownFill.classList.remove('ready'); }
+
+    const isReady = cooldownPercent >= 1 && !this.isDashing && this.score >= this.dashCost;
+
+    if (isReady) {
+      this.dashCooldownFill.classList.add('ready');
+      if (this.dashBtn) {
+        this.dashBtn.style.opacity = '1';
+        this.dashBtn.style.pointerEvents = 'auto';
+        this.dashBtn.style.transform = 'scale(1)';
+      }
+    } else {
+      this.dashCooldownFill.classList.remove('ready');
+      if (this.dashBtn) {
+        this.dashBtn.style.opacity = '0.4';
+        this.dashBtn.style.pointerEvents = 'none';
+        this.dashBtn.style.transform = 'scale(0.8)';
+      }
+    }
+  }
+
+  updateChallengeUI() {
+    const banner = document.getElementById('daily-challenge');
+    if (!banner || !this.dailyChallenge) return;
+
+    const isDone = this.dailyChallenge.check();
+    banner.innerHTML = `
+      <div class="challenge-header">
+        <span class="challenge-title">DAILY CHALLENGE</span>
+        <span class="challenge-status ${isDone ? 'completed' : 'active'}">
+          ${isDone ? 'COMPLETED' : 'ACTIVE'}
+        </span>
+      </div>
+      <div class="challenge-desc">${this.dailyChallenge.desc}</div>
+      ${isDone ? '<div class="challenge-reward">REWARD: +50 Bytes</div>' : ''}
+    `;
+
+    if (isDone && !this.dailyChallenge.awarded) {
+      this.bytes += 50; this.updateBytesDisplay();
+      this.dailyChallenge.awarded = true;
+      this.spawnFloatingText(this.snake[0]?.x || 10, this.snake[0]?.y || 10, "CHALLENGE COMPLETE!", "#ffd700");
+    }
   }
 
   createShockwave(x, y, color = '#00f2ff', maxRadius = 100) {
@@ -694,6 +746,7 @@ class SnakeGame {
     this.updateFloatingTexts();
     this.updateShockwaves();
     this.updateDashUI();
+    if (Math.random() < 0.05) this.updateChallengeUI(); // Throttle UI update
 
     // Update screen effects
     if (this.screenFlash > 0) this.screenFlash = Math.max(0, this.screenFlash - 0.05);

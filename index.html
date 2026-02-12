@@ -34,8 +34,25 @@
         </div>
       </header>
 
+      <!-- Dash Cooldown HUD -->
+      <div class="dash-hud">
+        <div class="dash-label">DASH ENGINE</div>
+        <div class="dash-bar">
+          <div id="dash-cooldown-fill"></div>
+        </div>
+      </div>
+
       <main class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
+
+        <!-- Daily Challenge Banner -->
+        <div id="daily-challenge" class="challenge-banner"></div>
+
+        <!-- Mobile Dash Button -->
+        <button id="mobile-dash-btn" class="dash-trigger">
+          <span class="icon">⚡</span>
+          <span class="text">DASH</span>
+        </button>
         <div id="game-over-overlay" class="overlay hidden">
           <div class="overlay-content">
             <h2>GAME OVER</h2>

@@ -579,9 +579,166 @@ canvas {
     opacity: 0.7;
 }
 
+/* Dash HUD & Progress Bar */
+.dash-hud {
+    margin: -0.5rem 1.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    z-index: 2;
+}
+
+.dash-label {
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: var(--m3-primary);
+    letter-spacing: 0.2em;
+    opacity: 0.8;
+}
+
+.dash-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 242, 255, 0.1);
+}
+
+#dash-cooldown-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00f2ff, #bc13fe);
+    box-shadow: 0 0 10px var(--m3-primary);
+    transition: width 0.1s linear;
+}
+
+#dash-cooldown-fill.ready {
+    background: linear-gradient(90deg, #00f2ff, #ffffff);
+    animation: bar-pulse 1s infinite;
+}
+
+@keyframes bar-pulse {
+
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.5);
+        box-shadow: 0 0 20px #00f2ff;
+    }
+}
+
+/* Daily Challenge Banner */
+.challenge-banner {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    padding: 0.8rem;
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 1rem;
+    z-index: 8;
+    color: #fff;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.2rem;
+}
+
+.challenge-title {
+    font-weight: 900;
+    color: #ffd700;
+    letter-spacing: 0.05em;
+}
+
+.challenge-status {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 900;
+}
+
+.challenge-status.active {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+}
+
+.challenge-status.completed {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+}
+
+.challenge-desc {
+    opacity: 0.8;
+    font-size: 0.7rem;
+}
+
+.challenge-reward {
+    font-size: 0.6rem;
+    color: #ffd700;
+    margin-top: 0.2rem;
+    font-weight: bold;
+}
+
+/* Mobile Dash Button */
+.dash-trigger {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(0, 242, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--m3-primary);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dash-trigger:active {
+    transform: scale(0.9);
+    background: rgba(0, 242, 255, 0.4);
+    box-shadow: 0 0 50px rgba(0, 242, 255, 0.6);
+}
+
+.dash-trigger .icon {
+    font-size: 1.5rem;
+    margin-bottom: -2px;
+}
+
+.dash-trigger .text {
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+
 @media (max-width: 400px) {
     .game-container {
         padding: 0.5rem;
         gap: 1rem;
+    }
+
+    .dash-trigger {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 60px;
+        height: 60px;
     }
 }
