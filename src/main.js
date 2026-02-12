@@ -44,6 +44,10 @@ class SnakeGame {
     this.hofList = document.getElementById('high-scores-list');
     this.homeBtn = document.getElementById('home-btn');
     this.dashBtn = document.getElementById('mobile-dash-btn');
+    this.btnUp = document.getElementById('btn-up');
+    this.btnDown = document.getElementById('btn-down');
+    this.btnLeft = document.getElementById('btn-left');
+    this.btnRight = document.getElementById('btn-right');
 
     // State
     this.bytes = parseInt(localStorage.getItem('snake-bytes')) || 0;
@@ -224,6 +228,24 @@ class SnakeGame {
         this.activateDash();
       }, { passive: false });
     }
+
+    // D-Pad Bindings
+    const bindBtn = (btn, dir, opposite) => {
+      if (btn) {
+        const handler = (e) => {
+          e.preventDefault();
+          if (this.direction !== opposite) this.nextDirection = dir;
+          if (window.navigator.vibrate) window.navigator.vibrate(10);
+        };
+        btn.addEventListener('mousedown', handler);
+        btn.addEventListener('touchstart', handler, { passive: false });
+      }
+    };
+
+    bindBtn(this.btnUp, 'up', 'down');
+    bindBtn(this.btnDown, 'down', 'up');
+    bindBtn(this.btnLeft, 'left', 'right');
+    bindBtn(this.btnRight, 'right', 'left');
   }
 
   togglePause(p) {

@@ -42,11 +42,11 @@
         </div>
       </div>
 
+      <!-- Daily Challenge Banner (Moved here to avoid canvas overlap) -->
+      <div id="daily-challenge" class="challenge-banner"></div>
+
       <main class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
-
-        <!-- Daily Challenge Banner -->
-        <div id="daily-challenge" class="challenge-banner"></div>
 
         <!-- Mobile Dash Button -->
         <button id="mobile-dash-btn" class="dash-trigger">
@@ -148,7 +148,17 @@
       </main>
 
       <footer class="game-controls">
-        <div class="control-tip">Swipe inside the box to move</div>
+        <div class="mobile-controls">
+          <div class="d-pad">
+            <button id="btn-up" class="d-btn up">▲</button>
+            <div class="d-pad-mid">
+              <button id="btn-left" class="d-btn left">◀</button>
+              <button id="btn-right" class="d-btn right">▶</button>
+            </div>
+            <button id="btn-down" class="d-btn down">▼</button>
+          </div>
+        </div>
+        <div class="control-tip">Swipe or use buttons to move</div>
       </footer>
     </div>
   </div>

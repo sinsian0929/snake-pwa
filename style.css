@@ -632,19 +632,17 @@ canvas {
 
 /* Daily Challenge Banner */
 .challenge-banner {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
+    position: relative;
+    margin: 0 1.5rem 0.8rem;
     padding: 0.8rem;
-    background: rgba(5, 5, 5, 0.7);
-    backdrop-filter: blur(10px);
+    background: rgba(26, 28, 30, 0.85);
+    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 1rem;
+    border-radius: 1.5rem;
     z-index: 8;
     color: #fff;
     font-size: 0.8rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -729,10 +727,54 @@ canvas {
     letter-spacing: 0.1em;
 }
 
+/* Mobile Controls (D-Pad) */
+.mobile-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.d-pad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.d-pad-mid {
+    display: flex;
+    gap: 40px;
+}
+
+.d-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(26, 28, 30, 0.8);
+    backdrop-filter: blur(8px);
+    border: 2px solid var(--m3-primary);
+    color: var(--m3-primary);
+    border-radius: 1rem;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.1s;
+}
+
+.d-btn:active {
+    transform: scale(0.9);
+    background: var(--m3-primary);
+    color: var(--m3-surface);
+    box-shadow: 0 0 20px var(--m3-primary);
+}
+
 @media (max-width: 400px) {
     .game-container {
         padding: 0.5rem;
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .dash-trigger {
@@ -740,5 +782,15 @@ canvas {
         right: 1.5rem;
         width: 60px;
         height: 60px;
+    }
+
+    .d-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .d-pad-mid {
+        gap: 30px;
     }
 }
