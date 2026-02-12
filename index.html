@@ -48,8 +48,20 @@
       <main class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
 
-        <!-- Mobile Dash Button -->
-        <button id="mobile-dash-btn" class="dash-trigger">
+        <!-- Floating Mobile Controls (Left Side) -->
+        <div class="mobile-controls floating-left">
+          <div class="d-pad">
+            <button id="btn-up" class="d-btn up">▲</button>
+            <div class="d-pad-mid">
+              <button id="btn-left" class="d-btn left">◀</button>
+              <button id="btn-right" class="d-btn right">▶</button>
+            </div>
+            <button id="btn-down" class="d-btn down">▼</button>
+          </div>
+        </div>
+
+        <!-- Floating Dash Button (Right Side) -->
+        <button id="mobile-dash-btn" class="dash-trigger floating-right">
           <span class="icon">⚡</span>
           <span class="text">DASH</span>
         </button>
@@ -148,17 +160,7 @@
       </main>
 
       <footer class="game-controls">
-        <div class="mobile-controls">
-          <div class="d-pad">
-            <button id="btn-up" class="d-btn up">▲</button>
-            <div class="d-pad-mid">
-              <button id="btn-left" class="d-btn left">◀</button>
-              <button id="btn-right" class="d-btn right">▶</button>
-            </div>
-            <button id="btn-down" class="d-btn down">▼</button>
-          </div>
-        </div>
-        <div class="control-tip">Swipe or use buttons to move</div>
+        <div class="control-tip">Floating controls enabled</div>
       </footer>
     </div>
   </div>
