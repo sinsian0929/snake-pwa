@@ -48,21 +48,21 @@
       <main class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
 
-        <!-- Floating Mobile Controls (Left Side) -->
-        <div class="mobile-controls floating-left">
-          <div class="d-pad">
-            <button id="btn-up" class="d-btn up">▲</button>
-            <button id="btn-left" class="d-btn left">◀</button>
-            <button id="btn-right" class="d-btn right">▶</button>
-            <button id="btn-down" class="d-btn down">▼</button>
+        <!-- Mobile Gameplay Controls Overlay (Hidden by default) -->
+        <div id="mobile-gameplay-controls" class="hidden">
+          <!-- Floating Joystick (Left Side) -->
+          <div class="joystick-wrapper">
+            <div id="joystick-base">
+              <div id="joystick-stick"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- Floating Dash Button (Right Side) -->
-        <button id="mobile-dash-btn" class="dash-trigger floating-right">
-          <span class="icon">⚡</span>
-          <span class="text">DASH</span>
-        </button>
+          <!-- Floating Dash Button (Right Side) -->
+          <button id="mobile-dash-btn" class="dash-trigger floating-right">
+            <span class="icon">⚡</span>
+            <span class="text">DASH</span>
+          </button>
+        </div>
         <div id="game-over-overlay" class="overlay hidden">
           <div class="overlay-content">
             <h2>GAME OVER</h2>

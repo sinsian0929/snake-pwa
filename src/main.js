@@ -44,10 +44,8 @@ class SnakeGame {
     this.hofList = document.getElementById('high-scores-list');
     this.homeBtn = document.getElementById('home-btn');
     this.dashBtn = document.getElementById('mobile-dash-btn');
-    this.btnUp = document.getElementById('btn-up');
-    this.btnDown = document.getElementById('btn-down');
-    this.btnLeft = document.getElementById('btn-left');
-    this.btnRight = document.getElementById('btn-right');
+    // Mobile Overlays
+    this.mobileControlsOverlay = document.getElementById('mobile-gameplay-controls');
 
     // State
     this.bytes = parseInt(localStorage.getItem('snake-bytes')) || 0;
@@ -65,6 +63,8 @@ class SnakeGame {
     this.frenzyTriggers = 0;
     this.isSFXMuted = false;
     this.eatEffect = 0;
+    this.mobileControlsOverlay = document.getElementById('mobile-gameplay-controls');
+    this.joystick = null;
 
     // Dash System
     this.isDashing = false;
@@ -229,23 +229,56 @@ class SnakeGame {
       }, { passive: false });
     }
 
-    // D-Pad Bindings
-    const bindBtn = (btn, dir, opposite) => {
-      if (btn) {
-        const handler = (e) => {
-          e.preventDefault();
-          if (this.direction !== opposite) this.nextDirection = dir;
-          if (window.navigator.vibrate) window.navigator.vibrate(10);
-        };
-        btn.addEventListener('mousedown', handler);
-        btn.addEventListener('touchstart', handler, { passive: false });
+    // Initialize Virtual Joystick
+    this.initJoystick();
+  }
+
+  initJoystick() {
+    const base = document.getElementById('joystick-base');
+    const stick = document.getElementById('joystick-stick');
+    if (!base || !stick) return;
+
+    let startX, startY, active = false;
+    const maxDist = 40;
+
+    const handleStart = (e) => {
+      active = true;
+      const t = e.touches ? e.touches[0] : e;
+      const rect = base.getBoundingClientRect();
+      startX = rect.left + rect.width / 2;
+      startY = rect.top + rect.height / 2;
+    };
+
+    const handleMove = (e) => {
+      if (!active) return;
+      e.preventDefault();
+      const t = e.touches ? e.touches[0] : e;
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      const dist = Math.min(maxDist, Math.sqrt(dx * dx + dy * dy));
+      const angle = Math.atan2(dy, dx);
+
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      stick.style.transform = `translate(${tx}px, ${ty}px)`;
+
+      if (dist > 20) {
+        const deg = (angle * 180) / Math.PI;
+        if (deg > -45 && deg <= 45 && this.direction !== 'left') this.nextDirection = 'right';
+        else if (deg > 45 && deg <= 135 && this.direction !== 'up') this.nextDirection = 'down';
+        else if ((deg > 135 || deg <= -135) && this.direction !== 'right') this.nextDirection = 'left';
+        else if (deg > -135 && deg <= -45 && this.direction !== 'down') this.nextDirection = 'up';
       }
     };
 
-    bindBtn(this.btnUp, 'up', 'down');
-    bindBtn(this.btnDown, 'down', 'up');
-    bindBtn(this.btnLeft, 'left', 'right');
-    bindBtn(this.btnRight, 'right', 'left');
+    const handleEnd = () => {
+      active = false;
+      stick.style.transform = 'translate(0, 0)';
+    };
+
+    base.addEventListener('touchstart', handleStart);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
   }
 
   togglePause(p) {
@@ -614,6 +647,8 @@ class SnakeGame {
     this.requestLoop();
     this.updateChallengeUI();
     this.spawnEnemies();
+    this.generateObstacles();
+    if (this.mobileControlsOverlay) this.mobileControlsOverlay.classList.remove('hidden');
   }
 
   requestLoop() {
@@ -688,8 +723,18 @@ class SnakeGame {
     this.obstacles = [];
     const c = this.cols || 20, r = this.rows || 20;
     const mx = Math.floor(c / 2), my = Math.floor(r / 2);
-    if (this.level === 2) this.obstacles.push({ x: mx - 2, y: my - 2 }, { x: mx + 2, y: my - 2 }, { x: mx - 2, y: my + 2 }, { x: mx + 2, y: my + 2 });
-    else if (this.level >= 3) { for (let i = 0; i < 6; i++) this.obstacles.push({ x: 4, y: 4 + i }, { x: c - 5, y: r - 5 - i }); }
+    const now = Date.now();
+    const addObs = (x, y) => this.obstacles.push({ x, y, spawnTime: now });
+
+    if (this.level === 2) {
+      addObs(mx - 2, my - 2); addObs(mx + 2, my - 2); addObs(mx - 2, my + 2); addObs(mx + 2, my + 2);
+    }
+    else if (this.level >= 3) {
+      for (let i = 0; i < 6; i++) {
+        addObs(4, 4 + i);
+        addObs(c - 5, r - 5 - i);
+      }
+    }
   }
 
   updateLevelDisplay() { if (this.levelElement) this.levelElement.textContent = this.level; }
@@ -835,7 +880,7 @@ class SnakeGame {
 
       const hitW = head.x < 0 || head.x >= c || head.y < 0 || head.y >= r;
       const hitS = this.snake.some(s => s.x === head.x && s.y === head.y);
-      const hitO = this.obstacles.some(o => o.x === head.x && o.y === head.y);
+      const hitO = this.obstacles.some(o => o.x === head.x && o.y === head.y && (Date.now() - (o.spawnTime || 0)) > 2000);
 
       if (hitW || hitS || hitO) {
         if (Date.now() < this.invincibleUntil || this.isDashing) {
@@ -962,7 +1007,15 @@ class SnakeGame {
         this.ctx.beginPath(); this.ctx.moveTo(0, i * this.gridSize); this.ctx.lineTo(this.canvas.width / this.dpr, i * this.gridSize); this.ctx.stroke();
       }
 
-      this.obstacles.forEach(o => { this.ctx.fillStyle = '#bc13fe'; this.ctx.fillRect(o.x * this.gridSize + 2, o.y * this.gridSize + 2, this.gridSize - 4, this.gridSize - 4); });
+      this.obstacles.forEach(o => {
+        const isGhost = (Date.now() - (o.spawnTime || 0)) < 2000;
+        this.ctx.save();
+        this.ctx.globalAlpha = isGhost ? 0.3 + Math.sin(Date.now() / 150) * 0.2 : 1.0;
+        this.ctx.fillStyle = isGhost ? '#00f2ff' : '#bc13fe';
+        this.ctx.shadowBlur = isGhost ? 20 : 0; this.ctx.shadowColor = '#00f2ff';
+        this.ctx.fillRect(o.x * this.gridSize + 2, o.y * this.gridSize + 2, this.gridSize - 4, this.gridSize - 4);
+        this.ctx.restore();
+      });
 
       if (this.bossFood && !isNaN(this.bossFood.x)) {
         const lx = (this.bossFood.prevX ?? this.bossFood.x) + (this.bossFood.x - (this.bossFood.prevX ?? this.bossFood.x)) * this.lerpStep;
@@ -1222,6 +1275,7 @@ class SnakeGame {
     this.shake(15, 400); this.beep(110, 0.2, 0.8, 'sawtooth');
     this.gameOverOverlay?.classList.remove('hidden');
     document.querySelector('.canvas-wrapper')?.classList.remove('overload-active');
+    if (this.mobileControlsOverlay) this.mobileControlsOverlay.classList.add('hidden');
   }
 
   updateHallOfFame(s) {
