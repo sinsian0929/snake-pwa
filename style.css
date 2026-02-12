@@ -721,13 +721,12 @@ canvas {
     margin-bottom: -2px;
 }
 
-.dash-trigger .text {}
 
 /* Mobile Floating Controls */
 .mobile-controls.floating-left {
     position: absolute;
-    bottom: 2rem;
-    left: 1.5rem;
+    bottom: 0.8rem;
+    left: 1rem;
     z-index: 100;
     pointer-events: none;
 }
@@ -747,10 +746,12 @@ canvas {
 .d-btn {
     width: 55px;
     height: 55px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border: 2px solid rgba(0, 242, 255, 0.4);
-    color: var(--m3-primary);
+    background: rgba(255, 255, 255, 0.05);
+    /* Very transparent */
+    backdrop-filter: blur(2px);
+    border: 1.5px solid rgba(0, 242, 255, 0.15);
+    color: rgba(0, 242, 255, 0.4);
+    /* Faded color */
     border-radius: 50%;
     font-size: 1.4rem;
     display: flex;
@@ -758,7 +759,7 @@ canvas {
     align-items: center;
     cursor: pointer;
     transition: all 0.1s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .d-btn.up {
@@ -788,22 +789,23 @@ canvas {
 /* Floating Dash Button (Right Side) */
 .dash-trigger.floating-right {
     position: absolute;
-    bottom: 2.5rem;
-    right: 2rem;
-    width: 80px;
-    height: 80px;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
-    background: rgba(188, 19, 254, 0.2);
-    backdrop-filter: blur(8px);
-    border: 2px solid rgba(188, 19, 254, 0.5);
-    color: #fff;
+    background: rgba(188, 19, 254, 0.08);
+    /* Very transparent */
+    backdrop-filter: blur(2px);
+    border: 2px solid rgba(188, 19, 254, 0.2);
+    color: rgba(255, 255, 255, 0.3);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 100;
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .dash-trigger:active {
@@ -826,22 +828,40 @@ canvas {
 }
 
 @media (max-width: 480px) {
-    .d-pad {
-        grid-template-columns: repeat(3, 48px);
-        grid-template-rows: repeat(3, 48px);
-        gap: 5px;
+    .game-hud {
+        padding: 0.5rem;
+        gap: 0.3rem;
     }
 
-    .d-btn {
-        width: 48px;
-        height: 48px;
+    .score-card .value {
         font-size: 1.2rem;
     }
 
+    .dash-hud {
+        margin: -0.2rem 1rem 0.2rem;
+    }
+
+    .challenge-banner {
+        margin: 0 1rem 0.4rem;
+        padding: 0.6rem;
+    }
+
+    .d-pad {
+        grid-template-columns: repeat(3, 44px);
+        grid-template-rows: repeat(3, 44px);
+        gap: 4px;
+    }
+
+    .d-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+    }
+
     .dash-trigger.floating-right {
-        width: 70px;
-        height: 70px;
-        bottom: 2rem;
-        right: 1.5rem;
+        width: 60px;
+        height: 60px;
+        bottom: 1rem;
+        right: 1rem;
     }
 }
