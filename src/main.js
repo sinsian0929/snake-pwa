@@ -49,7 +49,17 @@ class SnakeGame {
 
     // State
     this.bytes = parseInt(localStorage.getItem('snake-bytes')) || 0;
-    this.upgrades = JSON.parse(localStorage.getItem('snake-upgrades')) || { magnet: false, shield: false, duration: false };
+    const rawUpgrades = JSON.parse(localStorage.getItem('snake-upgrades')) || { magnet: false, shield: false, duration: false };
+    // Migration: Convert old boolean format to new object format if needed
+    this.upgrades = {};
+    Object.keys(rawUpgrades).forEach(key => {
+      const val = rawUpgrades[key];
+      if (typeof val === 'boolean') {
+        this.upgrades[key] = { purchased: val, enabled: val };
+      } else {
+        this.upgrades[key] = val;
+      }
+    });
     this.currentSkin = localStorage.getItem('snake-skin') || 'default';
     this.currentHead = localStorage.getItem('snake-head') || 'default';
     this.hallOfFame = JSON.parse(localStorage.getItem('snake-hall-fame')) || [];
@@ -320,8 +330,13 @@ class SnakeGame {
 
   setupShopEvents() {
     document.querySelectorAll('.buy-btn').forEach(btn => {
-      const id = btn.parentElement?.dataset.id || btn.dataset.id;
-      if (this.upgrades[id]) { btn.textContent = 'OWNED'; btn.classList.add('owned'); }
+      const id = btn.dataset.id || btn.parentElement?.dataset.id;
+      const up = this.upgrades[id];
+      if (up?.purchased) {
+        btn.textContent = up.enabled ? 'ON' : 'OFF';
+        btn.classList.add('owned');
+        if (!up.enabled) btn.classList.add('secondary'); else btn.classList.remove('secondary');
+      }
       btn.addEventListener('click', () => this.buyUpgrade(id, btn));
     });
 
@@ -332,7 +347,6 @@ class SnakeGame {
     document.querySelectorAll('.skin-opt').forEach(opt => {
       const s = opt.dataset.skin;
       if (s === this.currentSkin) opt.classList.add('active');
-      opt.addEventListener('mouseenter', () => { this.previewSkin = s; this.previewEatEffect = 1.0; });
       opt.addEventListener('click', () => {
         document.querySelectorAll('.skin-opt').forEach(o => o.classList.remove('active'));
         opt.classList.add('active'); this.currentSkin = s;
@@ -345,7 +359,6 @@ class SnakeGame {
     document.querySelectorAll('.head-opt').forEach(opt => {
       const h = opt.dataset.head;
       if (h === this.currentHead) opt.classList.add('active');
-      opt.addEventListener('mouseenter', () => { this.previewHead = h; this.previewEatEffect = 1.0; });
       opt.addEventListener('click', () => {
         document.querySelectorAll('.head-opt').forEach(o => o.classList.remove('active'));
         opt.classList.add('active'); this.currentHead = h;
@@ -391,12 +404,23 @@ class SnakeGame {
   }
 
   buyUpgrade(id, btn) {
-    if (this.upgrades[id]) return;
+    if (this.upgrades[id]?.purchased) {
+      // Toggle enabled state
+      this.upgrades[id].enabled = !this.upgrades[id].enabled;
+      btn.textContent = this.upgrades[id].enabled ? 'ON' : 'OFF';
+      btn.classList.toggle('secondary', !this.upgrades[id].enabled);
+      localStorage.setItem('snake-upgrades', JSON.stringify(this.upgrades));
+      this.beep(660, 0.1, 0.05, 'sine');
+      return;
+    }
     const price = parseInt(btn.dataset.price);
     if (this.bytes >= price) {
-      this.bytes -= price; this.upgrades[id] = true;
-      localStorage.setItem('snake-bytes', this.bytes); localStorage.setItem('snake-upgrades', JSON.stringify(this.upgrades));
-      btn.textContent = 'OWNED'; btn.classList.add('owned'); this.updateBytesDisplay(); this.beep(880, 0.2, 0.1, 'sine');
+      this.bytes -= price;
+      this.upgrades[id] = { purchased: true, enabled: true };
+      localStorage.setItem('snake-bytes', this.bytes);
+      localStorage.setItem('snake-upgrades', JSON.stringify(this.upgrades));
+      btn.textContent = 'ON'; btn.classList.add('owned');
+      this.updateBytesDisplay(); this.beep(880, 0.2, 0.1, 'sine');
     } else { this.shake(5, 100); this.beep(220, 0.1, 0.1, 'square'); }
   }
 
@@ -404,6 +428,8 @@ class SnakeGame {
     if (!this.shopOverlay) return;
     this.isPaused = s;
     if (s) {
+      this.previewSkin = this.currentSkin;
+      this.previewHead = this.currentHead;
       if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
       this.gameLoop = null;
       this.startOverlay?.classList.add('hidden');
@@ -809,6 +835,20 @@ class SnakeGame {
 
     if (this.activePowerUp === 'FIRE' && this.snake[0]) this.createParticles(this.snake[0].x, this.snake[0].y, '#ff4d00', 2, 4);
 
+    // Smooth Magnet Attraction (Frame-based)
+    if (this.upgrades.magnet?.enabled && this.snake[0]) {
+      const head = this.snake[0];
+      const dx = head.x - this.food.x;
+      const dy = head.y - this.food.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 5 && dist > 0.05) {
+        // Dynamic speed based on distance
+        const force = 0.08 / (dist + 0.5);
+        this.food.x += dx * force;
+        this.food.y += dy * force;
+      }
+    }
+
     this.updateParticles();
     this.updateFloatingTexts();
     this.updateShockwaves();
@@ -850,11 +890,6 @@ class SnakeGame {
       if (this.isOverload) {
         if (head.x < 0) head.x = c - 1; else if (head.x >= c) head.x = 0;
         if (head.y < 0) head.y = r - 1; else if (head.y >= r) head.y = 0;
-      }
-
-      if (this.upgrades.magnet) {
-        const d = Math.sqrt(Math.pow(head.x - this.food.x, 2) + Math.pow(head.y - this.food.y, 2));
-        if (d < 6 && d > 0.1) { this.food.x += (head.x - this.food.x) * 0.5; this.food.y += (head.y - this.food.y) * 0.5; }
       }
 
       // Dash Updates
