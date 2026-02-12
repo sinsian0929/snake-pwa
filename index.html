@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>Snake Premium</title>
+</head>
+
+<body>
+  <div id="app">
+    <div class="game-container">
+      <header class="game-hud">
+        <div class="score-card">
+          <span class="label">SCORE</span>
+          <span id="current-score" class="value">000</span>
+        </div>
+        <div class="score-card">
+          <span class="label">LEVEL</span>
+          <span id="current-level" class="value">1</span>
+        </div>
+        <div class="score-card">
+          <span class="label">BYTES</span>
+          <span id="current-bytes" class="value">000</span>
+        </div>
+        <div class="score-card">
+          <span class="label">BEST</span>
+          <span id="high-score" class="value">000</span>
+        </div>
+      </header>
+
+      <main class="canvas-wrapper">
+        <canvas id="game-canvas"></canvas>
+        <div id="game-over-overlay" class="overlay hidden">
+          <div class="overlay-content">
+            <h2>GAME OVER</h2>
+            <div id="reward-info" class="bytes-reward"></div>
+            <div id="game-stats" class="stats-panel">
+              <div class="stat-row"><span>DIST:</span> <span id="stat-dist">0</span></div>
+              <div class="stat-row"><span>BOOSTS:</span> <span id="stat-boosts">0</span></div>
+              <div class="stat-row"><span>FRENZY:</span> <span id="stat-frenzy">0</span></div>
+            </div>
+            <div class="leaderboard">
+              <h3>HALL OF FAME</h3>
+              <ul id="high-scores-list"></ul>
+            </div>
+            <div class="game-over-actions">
+              <button id="restart-btn" class="m3-btn">PLAY AGAIN</button>
+              <button id="home-btn" class="m3-btn secondary">HOME</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-overlay" class="overlay hidden">
+          <div class="overlay-content">
+            <h2>PAUSED</h2>
+            <div class="pause-actions">
+              <button id="resume-btn" class="m3-btn">RESUME</button>
+              <button id="mute-btn" class="m3-btn secondary">MUTE SFX</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="start-overlay" class="overlay">
+          <div class="overlay-content">
+            <h1>SNAKE</h1>
+            <p>Swipe to Turn</p>
+            <div class="menu-actions">
+              <button id="start-btn" class="m3-btn">START GAME</button>
+              <button id="shop-btn" class="m3-btn secondary">UPGRADE SHOP</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shop Modal -->
+        <div id="shop-overlay" class="overlay hidden">
+          <div class="overlay-content shop-panel">
+            <h2>CYBER SHOP</h2>
+            <div class="shop-items">
+              <div class="shop-item" data-id="magnet">
+                <span class="item-name">磁鐵模組</span>
+                <button class="buy-btn" data-price="500">500 B</button>
+              </div>
+              <div class="shop-item" data-id="shield">
+                <span class="item-name">備用核心 (護盾)</span>
+                <button class="buy-btn" data-price="1000">1000 B</button>
+              </div>
+              <div class="shop-item" data-id="duration">
+                <span class="item-name">強化電池 (異能)</span>
+                <button class="buy-btn" data-price="750">750 B</button>
+              </div>
+            </div>
+            <div class="skin-selector">
+              <div id="skin-preview-container" class="preview-box">
+                <canvas id="skin-preview-canvas"></canvas>
+                <div class="preview-label">LIVE PREVIEW</div>
+              </div>
+
+              <div class="custom-group">
+                <h3>MODULE COLORS</h3>
+                <div class="skin-options color-list">
+                  <div class="skin-opt" data-skin="default" style="background: #00f2ff"></div>
+                  <div class="skin-opt" data-skin="lava" style="background: #ff4d00"></div>
+                  <div class="skin-opt" data-skin="gold" style="background: #ffd700"></div>
+                  <div class="skin-opt" data-skin="ghost" style="background: #ffffff"></div>
+                </div>
+              </div>
+
+              <div class="custom-group">
+                <h3>HEAD MODULES</h3>
+                <div class="head-options module-list">
+                  <div class="head-opt" data-head="default">ORIGINAL</div>
+                  <div class="head-opt" data-head="mecha">MECHA V1</div>
+                  <div class="head-opt" data-head="mecha_striker" style="font-size: 0.6rem;">MECHA V2</div>
+                  <div class="head-opt" data-head="mecha_heavy" style="font-size: 0.6rem;">MECHA V3</div>
+                  <div class="head-opt" data-head="bio">BIO</div>
+                  <div class="head-opt" data-head="holo">HOLO V1</div>
+                  <div class="head-opt" data-head="holo_glitch" style="font-size: 0.6rem;">HOLO V2</div>
+                </div>
+              </div>
+            </div>
+            <button id="close-shop" class="m3-btn">CLOSE</button>
+          </div>
+        </div>
+      </main>
+
+      <footer class="game-controls">
+        <div class="control-tip">Swipe inside the box to move</div>
+      </footer>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => console.log('SW registered:', registration))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>

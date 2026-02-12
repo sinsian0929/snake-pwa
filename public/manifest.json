@@ -1,0 +1,18 @@
+{
+    "name": "Snake Premium",
+    "short_name": "Snake",
+    "description": "High-fidelity Snake game with Material Design 3.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#6366f1",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/528/528107.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
