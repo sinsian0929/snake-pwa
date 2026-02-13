@@ -118,6 +118,7 @@ class SnakeGame {
   init() {
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 300));
     if (this.highScoreElement) this.highScoreElement.textContent = this.formatScore(this.highScore);
 
     this.startBtn?.addEventListener('click', () => { this.initAudio(); this.start(); });
@@ -280,10 +281,14 @@ class SnakeGame {
     // 360 Degree Joystick Logic
     if (this.joystickStick && this.joystickBase) {
       let active = false;
-      const baseRect = this.joystickBase.getBoundingClientRect();
-      const centerX = baseRect.left + baseRect.width / 2;
-      const centerY = baseRect.top + baseRect.height / 2;
-      const maxDist = baseRect.width / 2;
+      let centerX, centerY, maxDist;
+
+      const updateJoystickCenter = () => {
+        const baseRect = this.joystickBase.getBoundingClientRect();
+        centerX = baseRect.left + baseRect.width / 2;
+        centerY = baseRect.top + baseRect.height / 2;
+        maxDist = baseRect.width / 2;
+      };
 
       const handleMove = (e) => {
         if (!active) return;
@@ -302,14 +307,20 @@ class SnakeGame {
         // Convert angle to directions (up, down, left, right)
         if (dist > 10) {
           const deg = angle * (180 / Math.PI);
-          if (deg > -45 && deg <= 45 && this.direction !== 'left') this.nextDirection = 'right';
-          else if (deg > 45 && deg <= 135 && this.direction !== 'up') this.nextDirection = 'down';
-          else if ((deg > 135 || deg <= -135) && this.direction !== 'right') this.nextDirection = 'left';
-          else if (deg > -135 && deg <= -45 && this.direction !== 'down') this.nextDirection = 'up';
+          if (deg > -45 && deg <= 45) {
+            if (this.direction !== 'left') this.nextDirection = 'right';
+          } else if (deg > 45 && deg <= 135) {
+            if (this.direction !== 'up') this.nextDirection = 'down';
+          } else if (deg > 135 || deg <= -135) {
+            if (this.direction !== 'right') this.nextDirection = 'left';
+          } else if (deg > -135 && deg <= -45) {
+            if (this.direction !== 'down') this.nextDirection = 'up';
+          }
         }
       };
 
       this.joystickStick.addEventListener('touchstart', (e) => {
+        updateJoystickCenter();
         active = true;
         e.preventDefault();
       });
