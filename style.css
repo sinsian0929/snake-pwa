@@ -309,9 +309,9 @@ canvas {
     border-radius: 1.2rem;
 }
 
-.overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+.overlay.hidden,
+.hidden {
+    display: none !important;
 }
 
 .overlay-content {

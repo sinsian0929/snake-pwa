@@ -82,18 +82,6 @@ class SnakeGame {
     this.timeScale = 1.0; // Time dilation effect
     this.levelUpGlow = 0; // Level up screen glow
 
-    // Daily Challenge System
-    this.challengeProgress = 0;
-    this.challengeCompleted = false;
-    this.enemiesKilled = 0;
-    this.availableChallenges = [
-      { id: 'speed_demon', name: 'Speed Demon', desc: 'Reach Level 5 in under 60 seconds', check: () => this.level >= 5 && this.totalDistance < 100 },
-      { id: 'no_power', name: 'Pure Skill', desc: 'Score 200 without using power-ups', check: () => this.score >= 200 && this.boostsEaten === 0 },
-      { id: 'combo_master', name: 'Combo Master', desc: 'Achieve a 5x combo', check: () => this.comboCount >= 5 },
-      { id: 'enemy_hunter', name: 'Enemy Hunter', desc: 'Destroy 10 enemies', check: () => this.enemiesKilled >= 10 },
-      { id: 'survivor', name: 'Survivor', desc: 'Survive to Level 10', check: () => this.level >= 10 }
-    ];
-    this.dailyChallenge = this.getDailyChallenge(); // Call AFTER availableChallenges is defined
 
     // Achievement System
     this.achievements = [
@@ -149,7 +137,6 @@ class SnakeGame {
     this.setupShopEvents();
     this.updateBytesDisplay();
     this.updateHallOfFameDisplay();
-    this.updateChallengeUI();
     this.setupControls();
   }
 
@@ -484,84 +471,6 @@ class SnakeGame {
     this.hofList.innerHTML = this.hallOfFame.map((h, i) => `<li><span class="rank">#${i + 1}</span><span class="score">${h.score}</span><span class="date">${h.date}</span></li>`).join('');
   }
 
-  getDailyChallenge() {
-    // Safety check
-    if (!this.availableChallenges || this.availableChallenges.length === 0) {
-      return null;
-    }
-
-    const today = new Date().toDateString();
-    const saved = localStorage.getItem('daily-challenge-date');
-
-    if (saved === today) {
-      const savedChallenge = localStorage.getItem('daily-challenge');
-      if (savedChallenge) return JSON.parse(savedChallenge);
-    }
-
-    // Generate new daily challenge
-    const seed = new Date().getDate() + new Date().getMonth() * 31;
-    const index = seed % this.availableChallenges.length;
-    const challenge = this.availableChallenges[index];
-
-    localStorage.setItem('daily-challenge-date', today);
-    localStorage.setItem('daily-challenge', JSON.stringify(challenge));
-    localStorage.removeItem('daily-challenge-completed'); // Reset completion
-
-    return challenge;
-  }
-
-  checkDailyChallenge() {
-    if (this.challengeCompleted || !this.dailyChallenge) return;
-    if (!this.snake || this.snake.length === 0) return; // Game not started
-    if (this.isDying) return; // Game is ending
-
-    try {
-      if (this.dailyChallenge.check && this.dailyChallenge.check()) {
-        this.challengeCompleted = true;
-        localStorage.setItem('daily-challenge-completed', 'true');
-
-        // Double bytes reward!
-        const bonus = Math.floor(this.score / 2);
-        this.bytes += bonus;
-        localStorage.setItem('snake-bytes', this.bytes);
-        this.updateBytesDisplay();
-
-        // Visual feedback
-        this.screenFlash = 0.8;
-        this.levelUpGlow = 1.0;
-        this.shake(20, 500);
-        this.beep(2200, 0.3, 0.15, 'sine');
-
-        if (this.snake[0]) {
-          this.createShockwave(this.snake[0].x, this.snake[0].y, '#ffff00', 200);
-          this.spawnFloatingText(this.snake[0].x, this.snake[0].y - 2, 'CHALLENGE COMPLETE!', '#ffff00');
-          this.spawnFloatingText(this.snake[0].x, this.snake[0].y - 3, `+${bonus} BONUS!`, '#00ff00');
-        }
-
-        this.updateChallengeUI();
-      }
-    } catch (e) {
-      console.error('Challenge check error:', e);
-    }
-  }
-
-  updateChallengeUI() {
-    const challengeEl = document.getElementById('daily-challenge');
-    if (!challengeEl || !this.dailyChallenge) return;
-
-    const isCompleted = localStorage.getItem('daily-challenge-completed') === 'true';
-    const status = isCompleted ? '✓ COMPLETED' : 'IN PROGRESS';
-    const statusClass = isCompleted ? 'completed' : 'active';
-
-    challengeEl.innerHTML = `
-      <div class="challenge-header">
-        <span class="challenge-title">${this.dailyChallenge.name}</span>
-        <span class="challenge-status ${statusClass}">${status}</span>
-      </div>
-      <div class="challenge-desc">${this.dailyChallenge.desc}</div>
-      <div class="challenge-reward">Reward: Double Bytes</div>
-    `;
-  }
 
   checkAchievements() {
     if (!this.achievements) return;
@@ -632,7 +541,6 @@ class SnakeGame {
     // Daily Challenge Reset
     this.enemiesKilled = 0;
     this.challengeCompleted = false;
-    this.updateChallengeUI();
 
     document.querySelector('.canvas-wrapper')?.classList.remove('overload-active');
     this.startOverlay?.classList.add('hidden'); this.gameOverOverlay?.classList.add('hidden');
@@ -837,8 +745,6 @@ class SnakeGame {
     if (this.levelUpGlow > 0) this.levelUpGlow = Math.max(0, this.levelUpGlow - 0.02);
     if (this.timeScale < 1.0) this.timeScale = Math.min(1.0, this.timeScale + 0.02);
 
-    // Check daily challenge
-    this.checkDailyChallenge();
 
     // Check achievements
     this.checkAchievements();
