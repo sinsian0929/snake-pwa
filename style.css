@@ -542,18 +542,37 @@ canvas {
     text-shadow: 0 0 10px #ffd700;
 }
 
-/* Overload Mode Filter */
+/* Overload & Dash Effects */
 .overload-active {
     animation: rainbow-bg 0.5s infinite;
+    box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.2);
+}
+
+.dash-active-screen {
+    animation: dash-pulse 0.2s infinite;
+}
+
+@keyframes dash-pulse {
+    0% {
+        box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.1);
+    }
+
+    50% {
+        box-shadow: inset 0 0 150px rgba(255, 255, 255, 0.3);
+    }
+
+    100% {
+        box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.1);
+    }
 }
 
 @keyframes rainbow-bg {
     0% {
-        filter: hue-rotate(0deg) contrast(1.2);
+        filter: hue-rotate(0deg) contrast(1.2) brightness(1.2);
     }
 
     100% {
-        filter: hue-rotate(360deg) contrast(1.5);
+        filter: hue-rotate(360deg) contrast(1.5) brightness(1.1);
     }
 }
 
@@ -648,16 +667,37 @@ canvas {
 .biome-matrix {
     --bg-color: #001200 !important;
     --grid-color: rgba(0, 255, 70, 0.12) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(0, 255, 70, 0.1) 0%, transparent 80%);
 }
 
 .biome-lava {
     --bg-color: #120000 !important;
     --grid-color: rgba(255, 77, 0, 0.12) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 77, 0, 0.1) 0%, transparent 80%);
 }
 
 .biome-void {
     --bg-color: #0a011a !important;
     --grid-color: rgba(188, 19, 254, 0.12) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(188, 19, 254, 0.1) 0%, transparent 80%);
+}
+
+.biome-frozen {
+    --bg-color: #000b1a !important;
+    --grid-color: rgba(0, 242, 255, 0.15) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.15) 0%, transparent 80%);
+}
+
+.biome-cyberpunk {
+    --bg-color: #1a001a !important;
+    --grid-color: rgba(255, 0, 255, 0.15) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 80%);
+}
+
+.biome-luxury {
+    --bg-color: #1a1500 !important;
+    --grid-color: rgba(255, 215, 0, 0.12) !important;
+    background-image: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 80%);
 }
 
 /* New Record Animation */
