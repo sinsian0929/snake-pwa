@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# snake-pwa
-=======
 # 🐍 Snake Premium - Cyberpunk Edition
 
 A modern, high-performance Snake game with stunning cyberpunk aesthetics, advanced power-ups, and progressive difficulty.
@@ -81,4 +78,3 @@ MIT License - Feel free to use and modify!
 ## 🙏 Credits
 
 Created with ❤️ by Antigravity
->>>>>>> f7c5f48 (Initial commit: Snake Premium PWA Game)

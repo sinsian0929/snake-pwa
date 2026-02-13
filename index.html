@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="vite.svg" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#6366f1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <title>Snake Premium</title>
 </head>
 
@@ -32,37 +32,26 @@
           <span class="label">BEST</span>
           <span id="high-score" class="value">000</span>
         </div>
+        <div class="score-card dash-indicator">
+          <span class="label">DASH</span>
+          <div id="dash-cooldown-bar" class="cooldown-bar">
+            <div id="dash-cooldown-fill" class="cooldown-fill"></div>
+          </div>
+        </div>
       </header>
 
-      <!-- Dash Cooldown HUD -->
-      <div class="dash-hud">
-        <div class="dash-label">DASH ENGINE</div>
-        <div class="dash-bar">
-          <div id="dash-cooldown-fill"></div>
+      <!-- Daily Challenge Banner -->
+      <div id="daily-challenge" class="daily-challenge-banner">
+        <div class="challenge-header">
+          <span class="challenge-title">Loading...</span>
+          <span class="challenge-status">...</span>
         </div>
+        <div class="challenge-desc">...</div>
+        <div class="challenge-reward">Reward: Double Bytes</div>
       </div>
-
-      <!-- Daily Challenge Banner (Moved here to avoid canvas overlap) -->
-      <div id="daily-challenge" class="challenge-banner"></div>
 
       <main class="canvas-wrapper">
         <canvas id="game-canvas"></canvas>
-
-        <!-- Mobile Gameplay Controls Overlay (Hidden by default) -->
-        <div id="mobile-gameplay-controls" class="hidden">
-          <!-- Floating Joystick (Left Side) -->
-          <div class="joystick-wrapper">
-            <div id="joystick-base">
-              <div id="joystick-stick"></div>
-            </div>
-          </div>
-
-          <!-- Floating Dash Button (Right Side) -->
-          <button id="mobile-dash-btn" class="dash-trigger floating-right">
-            <span class="icon">⚡</span>
-            <span class="text">DASH</span>
-          </button>
-        </div>
         <div id="game-over-overlay" class="overlay hidden">
           <div class="overlay-content">
             <h2>GAME OVER</h2>
@@ -157,14 +146,16 @@
         </div>
       </main>
 
-
+      <footer class="game-controls">
+        <div class="control-tip">Swipe inside the box to move</div>
+      </footer>
     </div>
   </div>
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('/sw.js')
           .then(registration => console.log('SW registered:', registration))
           .catch(err => console.log('SW registration failed:', err));
       });
