@@ -749,8 +749,8 @@ canvas {
 
 /* Joystick & Mobile Controls Stylings */
 .joystick-wrapper {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 50%;
     display: flex;
@@ -761,8 +761,8 @@ canvas {
 }
 
 #joystick-base {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
     background: rgba(0, 242, 255, 0.05);
     border-radius: 50%;
     display: flex;
@@ -773,8 +773,8 @@ canvas {
 }
 
 #joystick-stick {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     background: linear-gradient(135deg, #00f2ff 0%, #00a0ff 100%);
     border-radius: 50%;
     box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
@@ -831,20 +831,20 @@ canvas {
     }
 
     .joystick-wrapper {
-        width: 100px;
-        height: 100px;
+        width: 140px;
+        height: 140px;
         bottom: 10px !important;
         left: 10px !important;
     }
 
     #joystick-base {
-        width: 70px;
-        height: 70px;
+        width: 100px;
+        height: 100px;
     }
 
     #joystick-stick {
-        width: 35px;
-        height: 35px;
+        width: 45px;
+        height: 45px;
     }
 
     .dash-trigger {
