@@ -43,6 +43,10 @@ class SnakeGame {
     this.muteBtn = document.getElementById('mute-btn');
     this.hofList = document.getElementById('high-scores-list');
     this.homeBtn = document.getElementById('home-btn');
+    this.dashBtn = document.getElementById('mobile-dash-btn');
+    this.mobileControlsOverlay = document.getElementById('mobile-gameplay-controls');
+    this.joystickBase = document.getElementById('joystick-base');
+    this.joystickStick = document.getElementById('joystick-stick');
     this.dashCooldownFill = document.getElementById('dash-cooldown-fill');
 
     // State
@@ -272,22 +276,55 @@ class SnakeGame {
         this.activateDash();
       }
     });
-    let tsX = 0, tsY = 0;
-    window.addEventListener('touchstart', (e) => { tsX = e.touches[0].clientX; tsY = e.touches[0].clientY; }, { passive: false });
-    window.addEventListener('touchmove', (e) => {
-      if (!tsX || !tsY) return;
-      const dx = e.touches[0].clientX - tsX, dy = e.touches[0].clientY - tsY;
-      if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
-        if (Math.abs(dx) > Math.abs(dy)) {
-          if (dx > 0 && this.direction !== 'left') this.nextDirection = 'right';
-          else if (dx < 0 && this.direction !== 'right') this.nextDirection = 'left';
-        } else {
-          if (dy > 0 && this.direction !== 'up') this.nextDirection = 'down';
-          else if (dy < 0 && this.direction !== 'down') this.nextDirection = 'up';
+    this.dashBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.activateDash();
+    });
+
+    // 360 Degree Joystick Logic
+    if (this.joystickStick && this.joystickBase) {
+      let active = false;
+      const baseRect = this.joystickBase.getBoundingClientRect();
+      const centerX = baseRect.left + baseRect.width / 2;
+      const centerY = baseRect.top + baseRect.height / 2;
+      const maxDist = baseRect.width / 2;
+
+      const handleMove = (e) => {
+        if (!active) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - centerX;
+        const dy = touch.clientY - centerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+
+        const clampedDist = Math.min(dist, maxDist);
+        const stickX = Math.cos(angle) * clampedDist;
+        const stickY = Math.sin(angle) * clampedDist;
+
+        this.joystickStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+
+        // Convert angle to directions (up, down, left, right)
+        if (dist > 10) {
+          const deg = angle * (180 / Math.PI);
+          if (deg > -45 && deg <= 45 && this.direction !== 'left') this.nextDirection = 'right';
+          else if (deg > 45 && deg <= 135 && this.direction !== 'up') this.nextDirection = 'down';
+          else if ((deg > 135 || deg <= -135) && this.direction !== 'right') this.nextDirection = 'left';
+          else if (deg > -135 && deg <= -45 && this.direction !== 'down') this.nextDirection = 'up';
         }
-        tsX = tsY = 0;
-      }
-    }, { passive: false });
+      };
+
+      this.joystickStick.addEventListener('touchstart', (e) => {
+        active = true;
+        e.preventDefault();
+      });
+
+      window.addEventListener('touchmove', handleMove, { passive: false });
+      window.addEventListener('touchend', () => {
+        active = false;
+        this.joystickStick.style.transform = 'translate(0, 0)';
+      });
+    }
   }
 
   togglePause(p) {
@@ -298,12 +335,14 @@ class SnakeGame {
       if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
       this.gameLoop = null;
       this.stopBGM(); // Stop music
+      this.mobileControlsOverlay?.classList.add('hidden');
     } else {
       // RESUME
       this.pauseOverlay?.classList.add('hidden');
       this.lastUpdate = performance.now();
       this.requestLoop();
       this.playBGM(); // Resume music
+      this.mobileControlsOverlay?.classList.remove('hidden');
     }
   }
 
@@ -328,6 +367,7 @@ class SnakeGame {
     this.startOverlay?.classList.remove('hidden');
     if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
     this.gameLoop = null;
+    this.mobileControlsOverlay?.classList.add('hidden');
   }
 
   setupShopEvents() {
@@ -336,6 +376,9 @@ class SnakeGame {
       if (this.upgrades[id]) { btn.textContent = 'OWNED'; btn.classList.add('owned'); }
       btn.addEventListener('click', () => this.buyUpgrade(id, btn));
     });
+
+    // Add missing close button listener
+    this.closeShopBtn?.addEventListener('click', () => this.toggleShop(false));
 
     // 介面初始化：清除所有 Active 狀態以確保視覺同步
     document.querySelectorAll('.skin-opt').forEach(o => o.classList.remove('active'));
@@ -420,6 +463,7 @@ class SnakeGame {
       this.gameLoop = null;
       this.startOverlay?.classList.add('hidden');
       this.shopOverlay.classList.remove('hidden');
+      this.mobileControlsOverlay?.classList.add('hidden');
       this.startPreviewLoop();
     } else {
       this.shopOverlay.classList.add('hidden');
@@ -428,6 +472,7 @@ class SnakeGame {
       } else {
         this.lastUpdate = performance.now();
         this.requestLoop();
+        this.mobileControlsOverlay?.classList.remove('hidden');
       }
     }
   }
@@ -591,6 +636,7 @@ class SnakeGame {
 
     document.querySelector('.canvas-wrapper')?.classList.remove('overload-active');
     this.startOverlay?.classList.add('hidden'); this.gameOverOverlay?.classList.add('hidden');
+    if (this.mobileControlsOverlay) this.mobileControlsOverlay.classList.remove('hidden');
     if (this.gameLoop) cancelAnimationFrame(this.gameLoop);
     this.lastUpdate = performance.now();
     this.playBGM(); // Start BGM
@@ -917,7 +963,8 @@ class SnakeGame {
       if (nL > this.level) {
         this.level = nL;
         this.speed = Math.max(50, 150 - (this.level - 1) * 10);
-        this.generateObstacles(); this.updateLevelDisplay(); this.updateBiome();
+        this.generateObstacles();
+        this.updateLevelDisplay(); this.updateBiome();
         this.spawnEnemies();
         this.spawnFloatingText(this.snake[0].x, this.snake[0].y - 2, "LEVEL UP!", "#ff00ff");
         this.levelUpGlow = 1.0; // Full screen glow!
@@ -1301,6 +1348,7 @@ class SnakeGame {
     this.shake(15, 400); this.beep(110, 0.2, 0.8, 'sawtooth');
     this.gameOverOverlay?.classList.remove('hidden');
     document.querySelector('.canvas-wrapper')?.classList.remove('overload-active');
+    if (this.mobileControlsOverlay) this.mobileControlsOverlay.classList.add('hidden');
   }
 
   updateHallOfFame(s) {

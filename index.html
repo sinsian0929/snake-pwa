@@ -40,111 +40,119 @@
         </div>
       </header>
 
-      <!-- Daily Challenge Banner -->
-      <div id="daily-challenge" class="daily-challenge-banner">
-        <div class="challenge-header">
-          <span class="challenge-title">Loading...</span>
-          <span class="challenge-status">...</span>
+
+      <main class="canvas-wrapper" style="position: relative; z-index: 1;">
+        <canvas id="game-canvas"></canvas>
+      </main>
+
+      <!-- Mobile Controls Layer (Direct child of .game-container for better positioning) -->
+      <div id="mobile-gameplay-controls" class="hidden"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100;">
+        <div class="joystick-wrapper" style="position: absolute; bottom: 20px; left: 20px; pointer-events: auto;">
+          <div id="joystick-base">
+            <div id="joystick-stick"></div>
+          </div>
         </div>
-        <div class="challenge-desc">...</div>
-        <div class="challenge-reward">Reward: Double Bytes</div>
+        <div id="mobile-dash-btn" class="dash-trigger floating-right"
+          style="position: absolute; bottom: 25px; right: 20px; pointer-events: auto;">
+          <span class="icon">🚀</span>
+          <span class="label" style="font-size: 0.5rem;">DASH</span>
+        </div>
       </div>
 
-      <main class="canvas-wrapper">
-        <canvas id="game-canvas"></canvas>
-        <div id="game-over-overlay" class="overlay hidden">
-          <div class="overlay-content">
-            <h2>GAME OVER</h2>
-            <div id="reward-info" class="bytes-reward"></div>
-            <div id="game-stats" class="stats-panel">
-              <div class="stat-row"><span>DIST:</span> <span id="stat-dist">0</span></div>
-              <div class="stat-row"><span>BOOSTS:</span> <span id="stat-boosts">0</span></div>
-              <div class="stat-row"><span>FRENZY:</span> <span id="stat-frenzy">0</span></div>
-            </div>
-            <div class="leaderboard">
-              <h3>HALL OF FAME</h3>
-              <ul id="high-scores-list"></ul>
-            </div>
-            <div class="game-over-actions">
-              <button id="restart-btn" class="m3-btn">PLAY AGAIN</button>
-              <button id="home-btn" class="m3-btn secondary">HOME</button>
-            </div>
+      <!-- Overlays (Direct children of .game-container) -->
+      <div id="game-over-overlay" class="overlay hidden" style="z-index: 200;">
+        <div class="overlay-content">
+          <h2>GAME OVER</h2>
+          <div id="reward-info" class="bytes-reward"></div>
+          <div id="game-stats" class="stats-panel">
+            <div class="stat-row"><span>DIST:</span> <span id="stat-dist">0</span></div>
+            <div class="stat-row"><span>BOOSTS:</span> <span id="stat-boosts">0</span></div>
+            <div class="stat-row"><span>FRENZY:</span> <span id="stat-frenzy">0</span></div>
+          </div>
+          <div class="leaderboard">
+            <h3>HALL OF FAME</h3>
+            <ul id="high-scores-list"></ul>
+          </div>
+          <div class="game-over-actions">
+            <button id="restart-btn" class="m3-btn">PLAY AGAIN</button>
+            <button id="home-btn" class="m3-btn secondary">HOME</button>
           </div>
         </div>
+      </div>
 
-        <!-- Pause Overlay -->
-        <div id="pause-overlay" class="overlay hidden">
-          <div class="overlay-content">
-            <h2>PAUSED</h2>
-            <div class="pause-actions">
-              <button id="resume-btn" class="m3-btn">RESUME</button>
-              <button id="mute-btn" class="m3-btn secondary">MUTE SFX</button>
-            </div>
+      <!-- Pause Overlay -->
+      <div id="pause-overlay" class="overlay hidden" style="z-index: 200;">
+        <div class="overlay-content">
+          <h2>PAUSED</h2>
+          <div class="pause-actions">
+            <button id="resume-btn" class="m3-btn">RESUME</button>
+            <button id="mute-btn" class="m3-btn secondary">MUTE SFX</button>
           </div>
         </div>
+      </div>
 
-        <div id="start-overlay" class="overlay">
-          <div class="overlay-content">
-            <h1>SNAKE</h1>
-            <p>Swipe to Turn</p>
-            <div class="menu-actions">
-              <button id="start-btn" class="m3-btn">START GAME</button>
-              <button id="shop-btn" class="m3-btn secondary">UPGRADE SHOP</button>
-            </div>
+      <div id="start-overlay" class="overlay" style="z-index: 200;">
+        <div class="overlay-content">
+          <h1>SNAKE</h1>
+          <p>Swipe to Turn</p>
+          <div class="menu-actions">
+            <button id="start-btn" class="m3-btn">START GAME</button>
+            <button id="shop-btn" class="m3-btn secondary">UPGRADE SHOP</button>
           </div>
         </div>
+      </div>
 
-        <!-- Shop Modal -->
-        <div id="shop-overlay" class="overlay hidden">
-          <div class="overlay-content shop-panel">
-            <h2>CYBER SHOP</h2>
-            <div class="shop-items">
-              <div class="shop-item" data-id="magnet">
-                <span class="item-name">磁鐵模組</span>
-                <button class="buy-btn" data-price="500">500 B</button>
-              </div>
-              <div class="shop-item" data-id="shield">
-                <span class="item-name">備用核心 (護盾)</span>
-                <button class="buy-btn" data-price="1000">1000 B</button>
-              </div>
-              <div class="shop-item" data-id="duration">
-                <span class="item-name">強化電池 (異能)</span>
-                <button class="buy-btn" data-price="750">750 B</button>
-              </div>
+      <!-- Shop Modal -->
+      <div id="shop-overlay" class="overlay hidden" style="z-index: 300;">
+        <div class="overlay-content shop-panel">
+          <h2>CYBER SHOP</h2>
+          <div class="shop-items">
+            <div class="shop-item" data-id="magnet">
+              <span class="item-name">磁鐵模組</span>
+              <button class="buy-btn" data-price="500">500 B</button>
             </div>
-            <div class="skin-selector">
-              <div id="skin-preview-container" class="preview-box">
-                <canvas id="skin-preview-canvas"></canvas>
-                <div class="preview-label">LIVE PREVIEW</div>
-              </div>
-
-              <div class="custom-group">
-                <h3>MODULE COLORS</h3>
-                <div class="skin-options color-list">
-                  <div class="skin-opt" data-skin="default" style="background: #00f2ff"></div>
-                  <div class="skin-opt" data-skin="lava" style="background: #ff4d00"></div>
-                  <div class="skin-opt" data-skin="gold" style="background: #ffd700"></div>
-                  <div class="skin-opt" data-skin="ghost" style="background: #ffffff"></div>
-                </div>
-              </div>
-
-              <div class="custom-group">
-                <h3>HEAD MODULES</h3>
-                <div class="head-options module-list">
-                  <div class="head-opt" data-head="default">ORIGINAL</div>
-                  <div class="head-opt" data-head="mecha">MECHA V1</div>
-                  <div class="head-opt" data-head="mecha_striker" style="font-size: 0.6rem;">MECHA V2</div>
-                  <div class="head-opt" data-head="mecha_heavy" style="font-size: 0.6rem;">MECHA V3</div>
-                  <div class="head-opt" data-head="bio">BIO</div>
-                  <div class="head-opt" data-head="holo">HOLO V1</div>
-                  <div class="head-opt" data-head="holo_glitch" style="font-size: 0.6rem;">HOLO V2</div>
-                </div>
-              </div>
+            <div class="shop-item" data-id="shield">
+              <span class="item-name">備用核心 (護盾)</span>
+              <button class="buy-btn" data-price="1000">1000 B</button>
             </div>
-            <button id="close-shop" class="m3-btn">CLOSE</button>
+            <div class="shop-item" data-id="duration">
+              <span class="item-name">強化電池 (異能)</span>
+              <button class="buy-btn" data-price="750">750 B</button>
+            </div>
           </div>
+          <div class="skin-selector">
+            <div id="skin-preview-container" class="preview-box">
+              <canvas id="skin-preview-canvas"></canvas>
+              <div class="preview-label">LIVE PREVIEW</div>
+            </div>
+
+            <div class="custom-group">
+              <h3>MODULE COLORS</h3>
+              <div class="skin-options color-list">
+                <div class="skin-opt" data-skin="default" style="background: #00f2ff"></div>
+                <div class="skin-opt" data-skin="lava" style="background: #ff4d00"></div>
+                <div class="skin-opt" data-skin="gold" style="background: #ffd700"></div>
+                <div class="skin-opt" data-skin="ghost" style="background: #ffffff"></div>
+              </div>
+            </div>
+
+            <div class="custom-group">
+              <h3>HEAD MODULES</h3>
+              <div class="head-options module-list">
+                <div class="head-opt" data-head="default">ORIGINAL</div>
+                <div class="head-opt" data-head="mecha">MECHA V1</div>
+                <div class="head-opt" data-head="mecha_striker" style="font-size: 0.6rem;">MECHA V2</div>
+                <div class="head-opt" data-head="mecha_heavy" style="font-size: 0.6rem;">MECHA V3</div>
+                <div class="head-opt" data-head="bio">BIO</div>
+                <div class="head-opt" data-head="holo">HOLO V1</div>
+                <div class="head-opt" data-head="holo_glitch" style="font-size: 0.6rem;">HOLO V2</div>
+              </div>
+            </div>
+          </div>
+          <button id="close-shop" class="m3-btn" style="width: 100%; margin-top: 1rem;">CLOSE</button>
         </div>
-      </main>
+      </div>
 
       <footer class="game-controls">
         <div class="control-tip">Swipe inside the box to move</div>
