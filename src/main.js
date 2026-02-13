@@ -237,8 +237,12 @@ class SnakeGame {
     const parent = this.canvas?.parentElement;
     if (!parent || !this.canvas) return;
     const rect = parent.getBoundingClientRect();
-    const size = Math.max(200, Math.min(rect.width, rect.height));
+
+    // Fit the largest square possible within the parent container
+    const size = Math.min(rect.width, rect.height);
     const dim = Math.floor(size / this.gridSize) * this.gridSize;
+
+    if (dim < 100) return; // Prevent too small canvas
 
     this.canvas.width = dim * this.dpr;
     this.canvas.height = dim * this.dpr;
@@ -246,9 +250,13 @@ class SnakeGame {
     this.canvas.style.height = `${dim}px`;
     this.ctx.scale(this.dpr, this.dpr);
 
-    // Ensure cols/rows are safe integers
-    this.cols = Math.max(10, Math.floor(dim / this.gridSize)) || 20;
-    this.rows = Math.max(10, Math.floor(dim / this.gridSize)) || 20;
+    this.cols = Math.floor(dim / this.gridSize) || 20;
+    this.rows = Math.floor(dim / this.gridSize) || 20;
+
+    // Refresh game state that depends on size if mid-game
+    if (this.snake && this.snake.length > 0) {
+      this.generateObstacles();
+    }
   }
 
   setupControls() {
