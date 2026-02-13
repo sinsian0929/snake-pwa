@@ -65,6 +65,9 @@ class SnakeGame {
     this.frenzyTriggers = 0;
     this.isSFXMuted = false;
     this.eatEffect = 0;
+    this.currentHeadAngle = 0;
+    this.targetHeadAngle = 0;
+    this.bodyPulse = 0;
 
     // Dash System
     this.isDashing = false;
@@ -1110,7 +1113,7 @@ class SnakeGame {
         });
       }
 
-      // --- START: IMPROVED CONNECTED BODY DRAWING (Tapered & Dash) ---
+      // --- START: IMPROVED CONNECTED BODY DRAWING (Tapered & Armor) ---
       const snakeLen = this.snake.length;
       const colors = this.getPowerUpColor();
       if (Date.now() < this.invincibleUntil) {
@@ -1126,48 +1129,106 @@ class SnakeGame {
         colors.aura = '#00f2ff';
       }
 
+      this.bodyPulse = (Date.now() / 300) % Math.PI;
+
       this.ctx.save();
-      this.ctx.lineJoin = 'round';
-      this.ctx.lineCap = 'round';
 
       // 1. Draw Glow Layer (Bottom)
       this.ctx.shadowBlur = this.isDashing ? 45 : 20;
       this.ctx.shadowColor = colors.aura;
       this.ctx.strokeStyle = colors.aura;
       this.ctx.globalAlpha = 0.35;
+      this.ctx.lineJoin = 'round';
+      this.ctx.lineCap = 'round';
 
-      for (let i = 1; i < snakeLen; i++) {
-        const taper = 1 - (i / snakeLen) * 0.65; // Tail is 35% width
-        this.ctx.lineWidth = this.gridSize * (this.isDashing ? 0.45 : 0.85) * taper;
+      // Drawing segments as connected path for glow
+      this.ctx.beginPath();
+      this.snake.forEach((seg, i) => {
+        const p = this.getLerpPos(i);
+        const px = p.x * this.gridSize + this.gridSize / 2;
+        const py = p.y * this.gridSize + this.gridSize / 2;
+        if (i === 0) this.ctx.moveTo(px, py);
+        else this.ctx.lineTo(px, py);
+      });
+      this.ctx.lineWidth = this.gridSize * 0.8;
+      this.ctx.stroke();
 
-        const p1 = this.getLerpPos(i - 1);
-        const p2 = this.getLerpPos(i);
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(p1.x * this.gridSize + this.gridSize / 2, p1.y * this.gridSize + this.gridSize / 2);
-        this.ctx.lineTo(p2.x * this.gridSize + this.gridSize / 2, p2.y * this.gridSize + this.gridSize / 2);
-        this.ctx.stroke();
-      }
-
-      // 2. Draw Main Body Core (Top)
+      // 2. Draw Mechanical Armored Segments
       this.ctx.shadowBlur = 0;
-      this.ctx.strokeStyle = colors.body;
       this.ctx.globalAlpha = 1.0;
 
       for (let i = 1; i < snakeLen; i++) {
-        const taper = 1 - (i / snakeLen) * 0.65;
-        this.ctx.lineWidth = this.gridSize * (this.isDashing ? 0.3 : 0.6) * taper;
-
         const p1 = this.getLerpPos(i - 1);
         const p2 = this.getLerpPos(i);
+        const taper = 1 - (i / snakeLen) * 0.5;
+        const size = this.gridSize * 0.65 * taper;
 
+        const px = p2.x * this.gridSize + this.gridSize / 2;
+        const py = p2.y * this.gridSize + this.gridSize / 2;
+
+        // Calculate angle between segments for segment rotation
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const segAngle = Math.atan2(dy, dx);
+
+        this.ctx.save();
+        this.ctx.translate(px, py);
+        this.ctx.rotate(segAngle);
+
+        // Segment Connection (Darker Mechanical Part)
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.fillRect(-this.gridSize / 2, -size / 3, this.gridSize / 2, size / 1.5);
+
+        // Armor Plate
+        const pulse = Math.sin(this.bodyPulse - (i * 0.3)) * 0.2 + 0.8;
+        this.ctx.fillStyle = colors.body;
+        this.ctx.globalAlpha = pulse;
+
+        // Hexagonal or Rounded Armor Plate
         this.ctx.beginPath();
-        this.ctx.moveTo(p1.x * this.gridSize + this.gridSize / 2, p1.y * this.gridSize + this.gridSize / 2);
-        this.ctx.lineTo(p2.x * this.gridSize + this.gridSize / 2, p2.y * this.gridSize + this.gridSize / 2);
+        this.ctx.roundRect(-size / 2, -size / 2, size, size, size / 4);
+        this.ctx.fill();
+
+        // Edge Highlight
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        this.ctx.lineWidth = 1;
         this.ctx.stroke();
+
+        this.ctx.restore();
       }
 
-      // 3. Draw Data Pulse Pattern on Body
+      // 3. Draw Neck Coupling (Behind Head)
+      if (snakeLen > 1) {
+        const headPos = this.getLerpPos(0);
+        const firstSegPos = this.getLerpPos(1);
+        const dx = headPos.x - firstSegPos.x;
+        const dy = headPos.y - firstSegPos.y;
+        const headTargetAngle = Math.atan2(dy, dx);
+
+        // Interpolate head angle for smoothness
+        let angleDiff = headTargetAngle - this.currentHeadAngle;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        this.currentHeadAngle += angleDiff * 0.2;
+
+        this.ctx.save();
+        this.ctx.translate(headPos.x * this.gridSize + this.gridSize / 2, headPos.y * this.gridSize + this.gridSize / 2);
+        this.ctx.rotate(this.currentHeadAngle);
+
+        // Neck Joint
+        this.ctx.fillStyle = '#333';
+        this.ctx.beginPath();
+        this.ctx.roundRect(-this.gridSize / 2, -this.gridSize / 4, this.gridSize / 2, this.gridSize / 2, 2);
+        this.ctx.fill();
+
+        // Glow on neck
+        this.ctx.fillStyle = colors.aura;
+        this.ctx.globalAlpha = 0.5;
+        this.ctx.fillRect(-this.gridSize / 3, -this.gridSize / 8, this.gridSize / 4, this.gridSize / 4);
+        this.ctx.restore();
+      }
+
+      // 4. Draw Data Pulse Pattern on Body
       this.ctx.beginPath();
       this.ctx.strokeStyle = '#fff';
       this.ctx.lineWidth = 1.5;
@@ -1186,7 +1247,7 @@ class SnakeGame {
       this.ctx.setLineDash([]);
       this.ctx.restore();
 
-      // 4. Draw Head on Top
+      // 5. Draw Head on Top
       if (this.snake[0]) {
         const headPos = this.getLerpPos(0);
         this.drawDetailedHead(
@@ -1197,7 +1258,7 @@ class SnakeGame {
           this.gridSize * (this.isDashing ? 1.5 : 1.3),
           this.gridSize / 2.5,
           colors,
-          this.direction,
+          this.currentHeadAngle, // Pass interpolated angle
           this.eatEffect
         );
       }
@@ -1483,8 +1544,15 @@ class SnakeGame {
 
     ctx.save();
     ctx.translate(cx, cy);
-    const angle = dir === 'up' ? -Math.PI / 2 : dir === 'down' ? Math.PI / 2 : dir === 'left' ? Math.PI : 0;
-    ctx.rotate(angle);
+
+    // Support both string direction and numeric angle
+    let finalAngle = 0;
+    if (typeof dir === 'number') {
+      finalAngle = dir;
+    } else {
+      finalAngle = dir === 'up' ? -Math.PI / 2 : dir === 'down' ? Math.PI / 2 : dir === 'left' ? Math.PI : 0;
+    }
+    ctx.rotate(finalAngle);
 
     if (shape.startsWith('mecha')) {
       // 1. MECHA V1: Classic (Dragon Style) - Restored
